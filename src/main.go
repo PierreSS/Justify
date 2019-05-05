@@ -19,11 +19,11 @@ func balanceTonPort() string {
 }
 
 func main() {
-	addr := balanceTonPort()
-
+	//	addr := balanceTonPort()
+	port := ":" + os.Getenv("PORT")
 	r := mux.NewRouter()
 	handleRequest(r)
-	if err := http.ListenAndServe(addr, r); err != nil {
+	if err := http.ListenAndServe(port, r); err != nil {
 		panic(err)
 	}
 }
