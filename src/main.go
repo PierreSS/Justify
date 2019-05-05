@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,21 +9,13 @@ import (
 )
 
 //Set le port
-func balanceTonPort() (string, error) {
+func balanceTonPort() string {
 	port := os.Getenv("PORT")
-	if port == "" {
-		return "", fmt.Errorf("$PORT not set")
-	}
-	return ":" + port, nil
+	return ":" + port
 }
 
 func main() {
-
-	//	port, err := balanceTonPort()
-	//	checkError(err)
-
 	r := mux.NewRouter()
 	handleRequest(r)
-	//	log.Fatal(http.ListenAndServe(":"+env.PortWebRequest, r))
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(balanceTonPort(), r))
 }
