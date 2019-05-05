@@ -1,1 +1,1 @@
-web: bin/poliright_api 
+web: bin/justify
