@@ -9,6 +9,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var m = make(map[string]int)
+var mTime = make(map[string]int64)
+
 //Gere toute les routes du serveur HTTP
 func handleRequest(router *mux.Router) {
 	router.HandleFunc("/", index).Methods("GET")
@@ -24,9 +27,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 //Justify route
 func justify(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	ok, er := verifyToken(w, r)
+	claims, ok := verifyToken(w, r)
 	if !ok {
-		fmt.Fprintf(w, "%s", er)
+		fmt.Fprintf(w, "%s", "error")
 		return
 	}
 	responseData, err := ioutil.ReadAll(r.Body)
@@ -34,7 +37,7 @@ func justify(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	responseString := string(responseData)
-	str := justifytxt(responseString, 80)
+	str := justifytxt(responseString, 80, claims.Email, w)
 
 	fmt.Fprintf(w, "%s", str)
 }

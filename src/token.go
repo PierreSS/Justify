@@ -14,6 +14,7 @@ var jwtKey = []byte("tictactrip")
 //Liste de mails obligatoire pour avoir un token
 var mail = []string{
 	"foo@bar.com",
+	"foo2@bar.com",
 }
 
 //Credentials pour le token
@@ -28,15 +29,15 @@ type Claims struct {
 }
 
 //Vérifie si le token du cookie est valide
-func verifyToken(w http.ResponseWriter, r *http.Request) (bool, string) {
+func verifyToken(w http.ResponseWriter, r *http.Request) (*Claims, bool) {
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
 			w.WriteHeader(http.StatusUnauthorized)
-			return false, string(http.StatusUnauthorized)
+			return nil, false
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		return false, string(http.StatusBadRequest)
+		return nil, false
 	}
 	tknStr := c.Value
 	claims := &Claims{}
@@ -45,17 +46,17 @@ func verifyToken(w http.ResponseWriter, r *http.Request) (bool, string) {
 	})
 	if !tkn.Valid {
 		w.WriteHeader(http.StatusUnauthorized)
-		return false, string(http.StatusUnauthorized)
+		return nil, false
 	}
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			w.WriteHeader(http.StatusUnauthorized)
-			return false, string(http.StatusUnauthorized)
+			return nil, false
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		return false, string(http.StatusBadRequest)
+		return nil, false
 	}
-	return true, string(http.StatusOK)
+	return claims, true
 }
 
 //Vérifie qu'un mail est bien enregistré
@@ -81,7 +82,7 @@ func createToken(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	expirationTime := time.Now().Add(2 * time.Minute)
+	expirationTime := time.Now().Add(168 * time.Hour)
 	claims := &Claims{
 		Email: creds.Email,
 		StandardClaims: jwt.StandardClaims{
@@ -94,6 +95,8 @@ func createToken(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	//Rate limit var
+	m[creds.Email] = 0
 	http.SetCookie(w, &http.Cookie{
 		Name:    "token",
 		Path:    "/",
