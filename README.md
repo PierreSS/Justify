@@ -1,6 +1,6 @@
 # Justify
 
-API Rest qui justifie un texte sur un l'endpoint api/justify
+API Rest qui justifie un texte sur l'endpoint api/justify
 
 Le token se trouve sur l'endpoint api/token
 
